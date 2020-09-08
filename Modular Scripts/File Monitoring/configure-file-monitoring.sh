@@ -98,9 +98,6 @@ installLogglyConfForFile() {
   #restart rsyslog
   restartRsyslog
 
-  #verify if the file logs made it to loggly
-  checkIfFileLogsMadeToLoggly
-
   if [ "$IS_FILE_MONITOR_SCRIPT_INVOKED" = "false" ]; then
     #log success message
     logMsgToConfigSysLog "SUCCESS" "SUCCESS: Successfully configured to send $LOGGLY_FILE_TO_MONITOR logs via Loggly."
@@ -357,7 +354,7 @@ doCronInstallation() {
   sudo chmod +x $CRON_SCRIPT
 
   cronScriptStr="#!/bin/bash
-curl -s -o configure-file-monitoring.sh https://www.loggly.com/install/configure-file-monitoring.sh
+curl -s -o configure-file-monitoring.sh https://raw.githubusercontent.com/imperfectproduce/install-script/master/Modular%20Scripts/File%20Monitoring/configure-file-monitoring.sh
 sudo mv -f $FILE_SYSLOG_CONFFILE $FILE_SYSLOG_CONFFILE.bk
 sudo rm -f $FILE_SYSLOG_CONFFILE
 sudo bash configure-file-monitoring.sh -a $LOGGLY_ACCOUNT -u $LOGGLY_USERNAME -p $LOGGLY_PASSWORD -f $LOGGLY_FILE_TO_MONITOR -l $FILE_ALIAS -tag $LOGGLY_FILE_TAG -s
@@ -481,66 +478,6 @@ write21ConfFileContents() {
 $imfileStr
 EOIPFW
 
-}
-
-#checks if the apache logs made to loggly
-checkIfFileLogsMadeToLoggly() {
-  counter=1
-  maxCounter=10
-
-  fileInitialLogCount=0
-  fileLatestLogCount=0
-  queryParam="syslog.appName%3A$LOGGLY_FILE_TO_MONITOR_ALIAS&from=-15m&until=now&size=1"
-
-  queryUrl="$LOGGLY_ACCOUNT_URL/apiv2/search?q=$queryParam"
-  logMsgToConfigSysLog "INFO" "INFO: Search URL: $queryUrl"
-
-  logMsgToConfigSysLog "INFO" "INFO: Getting initial log count."
-  #get the initial count of file logs for past 15 minutes
-  searchAndFetch fileInitialLogCount "$queryUrl"
-
-  logMsgToConfigSysLog "INFO" "INFO: Verifying if the logs made it to Loggly."
-  logMsgToConfigSysLog "INFO" "INFO: Verification # $counter of total $maxCounter."
-  #get the final count of file logs for past 15 minutes
-  searchAndFetch fileLatestLogCount "$queryUrl"
-  let counter=$counter+1
-
-  while [ "$fileLatestLogCount" -le "$fileInitialLogCount" ]; do
-    echo "INFO: Did not find the test log message in Loggly's search yet. Waiting for 30 secs."
-    sleep 30
-    echo "INFO: Done waiting. Verifying again."
-    logMsgToConfigSysLog "INFO" "INFO: Verification # $counter of total $maxCounter."
-    searchAndFetch fileLatestLogCount "$queryUrl"
-    let counter=$counter+1
-    if [ "$counter" -gt "$maxCounter" ]; then
-      logMsgToConfigSysLog "ERROR" "ERROR: File logs did not make to Loggly in time. Please check network and firewall settings and retry."
-      exit 1
-    fi
-  done
-
-  if [ "$fileLatestLogCount" -gt "$fileInitialLogCount" ]; then
-    logMsgToConfigSysLog "INFO" "INFO: Logs successfully transferred to Loggly! You are now sending $LOGGLY_FILE_TO_MONITOR logs to Loggly."
-    checkIfLogsAreParsedInLoggly
-  fi
-}
-
-#verifying if the logs are being parsed or not
-checkIfLogsAreParsedInLoggly() {
-  fileInitialLogCount=0
-  TAG_PARSER=
-  IFS=, read -a array <<<"$LOGGLY_FILE_TAG"
-  for i in "${array[@]}"; do
-    TAG_PARSER="$TAG_PARSER%20tag%3A$i "
-  done
-
-  queryParam="syslog.appName%3A$LOGGLY_FILE_TO_MONITOR_ALIAS$TAG_PARSER&from=-15m&until=now&size=1"
-  queryUrl="$LOGGLY_ACCOUNT_URL/apiv2/search?q=$queryParam"
-  searchAndFetch fileInitialLogCount "$queryUrl"
-  if [ "$fileInitialLogCount" -gt 0 ]; then
-    logMsgToConfigSysLog "INFO" "INFO: File logs successfully parsed in Loggly!"
-  else
-    logMsgToConfigSysLog "WARN" "WARN: We received your logs but they do not appear to use one of our automatically parsed formats. You can still do full text search and counts on these logs, but you won't be able to use our field explorer. Please consider switching to one of our automated formats https://www.loggly.com/docs/automated-parsing/"
-  fi
 }
 
 #checks if the conf file exist. Name of conf file is constructed using the file alias name provided
