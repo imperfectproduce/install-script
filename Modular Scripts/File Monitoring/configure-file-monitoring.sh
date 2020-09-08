@@ -357,7 +357,8 @@ doCronInstallation() {
 curl -s -o configure-file-monitoring.sh https://raw.githubusercontent.com/imperfectproduce/install-script/master/Modular%20Scripts/File%20Monitoring/configure-file-monitoring.sh
 sudo mv -f $FILE_SYSLOG_CONFFILE $FILE_SYSLOG_CONFFILE.bk
 sudo rm -f $FILE_SYSLOG_CONFFILE
-sudo bash configure-file-monitoring.sh -a $LOGGLY_ACCOUNT -u $LOGGLY_USERNAME -p $LOGGLY_PASSWORD -f $LOGGLY_FILE_TO_MONITOR -l $FILE_ALIAS -tag $LOGGLY_FILE_TAG -s
+export loggly_pass=$(aws secretsmanager get-secret-value --secret-id LogglyPassword --region=us-west-1 --query='SecretString' --output text | jq -r '.password')
+sudo bash configure-file-monitoring.sh -a $LOGGLY_ACCOUNT -u $LOGGLY_USERNAME -p $loggly_pass -f $LOGGLY_FILE_TO_MONITOR -l $FILE_ALIAS -tag $LOGGLY_FILE_TAG -s
 "
   #write to cron script file
 
