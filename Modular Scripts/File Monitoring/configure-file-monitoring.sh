@@ -2,7 +2,7 @@
 
 #downloads configure-linux.sh
 echo "INFO: Downloading dependencies - configure-linux.sh"
-curl -s -o configure-linux.sh https://www.loggly.com/install/configure-linux.sh
+curl -s -o configure-linux.sh https://raw.githubusercontent.com/imperfectproduce/install-script/master/Linux%20Script/configure-linux.sh
 source configure-linux.sh "being-invoked"
 
 ##########  Variable Declarations - Start  ##########
