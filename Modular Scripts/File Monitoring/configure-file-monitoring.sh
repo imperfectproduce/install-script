@@ -213,7 +213,7 @@ configureFilesPresentInDirectory() {
   var=$(echo $var | tr "[:upper:]" "[:lower:]")
   if [[ $var == *text* ]]; then
     LOGGLY_FILE_TO_MONITOR_ALIAS=$uniqueFileName-$2
-    if [ -f ${FILE_TO_MONITOR} ]; then
+    if [ ! -f ${FILE_SYSLOG_CONFFILE} ] && [ -f ${FILE_TO_MONITOR} ]; then
       constructFileVariables
       checkFileReadPermission
       checkLogFileSize $FILE_TO_MONITOR
