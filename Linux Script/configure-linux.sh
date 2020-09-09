@@ -159,8 +159,8 @@ checkLinuxLogglyCompatibility() {
   #check if selinux service is enforced. if yes, ask the user to manually disable and exit the script
   checkIfSelinuxServiceEnforced
 
-  #update rsyslog.conf and adds $MaxMessageSize in it
-  modifyMaxMessageSize
+  #update rsyslog.conf and adds $MaxMessageSize in it and imfile module
+  modifyMaxMessageSizeAndAddImfileModule
 
   LINUX_ENV_VALIDATED="true"
 }
@@ -483,11 +483,14 @@ checkIfSelinuxServiceEnforced() {
 }
 
 #update rsyslog.conf and adds $MaxMessageSize in it
-modifyMaxMessageSize() {
+modifyMaxMessageSizeAndAddImfileModule() {
   if grep -q '$MaxMessageSize' "/etc/rsyslog.conf"; then
     sed -i 's/.*$MaxMessageSize.*/$MaxMessageSize 64k/g' /etc/rsyslog.conf
   else
     sed -i '1 a $MaxMessageSize 64k' /etc/rsyslog.conf
+  fi
+  if ! grep -q 'module(load="imfile")' "/etc/rsyslog.conf"; then
+    sed -i '2 a module(load="imfile")' /etc/rsyslog.conf
   fi
   logMsgToConfigSysLog "INFO" "INFO: Modified \$MaxMessageSize to 64k in rsyslog.conf"
 }
