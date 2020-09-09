@@ -393,7 +393,6 @@ write21ConfFileContents() {
   r_ver=${rsyslog_version:9:1}
   if [ $r_ver -le 7 ]; then
     imfileStr="
-            \$ModLoad imfile
             \$InputFilePollInterval 10
             \$WorkDirectory $RSYSLOG_DIR
             \$ActionSendStreamDriver gtls
@@ -419,7 +418,6 @@ write21ConfFileContents() {
             if \$programname == '$LOGGLY_FILE_TO_MONITOR_ALIAS' then stop
         "
     imfileStrNonTls="
-            \$ModLoad imfile
             \$InputFilePollInterval 10
             \$WorkDirectory $RSYSLOG_DIR
 
@@ -439,32 +437,30 @@ write21ConfFileContents() {
         "
   else
     imfileStr="
-            module(load=\"imfile\")
 
             #RsyslogGnuTLS
             \$DefaultNetstreamDriverCAFile $CA_FILE_PATH
 
             # Input for FILE1
-            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
+            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog-$FILE_TO_MONITOR\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
 
             # Add a tag for file events
             template(name=\"$CONF_FILE_FORMAT_NAME\" type=\"string\" string=\"<%pri%>%protocol-version% %timestamp:::date-rfc3339% %HOSTNAME% %app-name% %procid% %msgid% [$LOGGLY_AUTH_TOKEN@41058 $TAG] %msg%\n\")
 
-            ruleset(name=\"filelog\"){
+            ruleset(name=\"filelog-$FILE_TO_MONITOR\"){
             action(type=\"omfwd\" protocol=\"tcp\" target=\"logs-01.loggly.com\" port=\"6514\" template=\"$CONF_FILE_FORMAT_NAME\" StreamDriver=\"gtls\" StreamDriverMode=\"1\" StreamDriverAuthMode=\"x509/name\" StreamDriverPermittedPeers=\"*.loggly.com\")
             }
         "
     imfileStrNonTls="
 
-            module(load=\"imfile\")
 
             # Input for FILE1
-            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
+            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog-$FILE_TO_MONITOR\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
 
             # Add a tag for file events
             template(name=\"$CONF_FILE_FORMAT_NAME\" type=\"string\" string=\"<%pri%>%protocol-version% %timestamp:::date-rfc3339% %HOSTNAME% %app-name% %procid% %msgid% [$LOGGLY_AUTH_TOKEN@41058 $TAG] %msg%\n\")
 
-            ruleset(name=\"filelog\"){
+            ruleset(name=\"filelog-$FILE_TO_MONITOR\"){
             action(type=\"omfwd\" protocol=\"tcp\" target=\"logs-01.loggly.com\" port=\"514\" template=\"$CONF_FILE_FORMAT_NAME\") stop
             }
         "
