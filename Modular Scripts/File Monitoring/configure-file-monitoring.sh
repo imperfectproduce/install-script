@@ -213,6 +213,7 @@ configureFilesPresentInDirectory() {
   var=$(echo $var | tr "[:upper:]" "[:lower:]")
   if [[ $var == *text* ]]; then
     LOGGLY_FILE_TO_MONITOR_ALIAS=$uniqueFileName-$2
+    FILE_SYSLOG_CONFFILE="$RSYSLOG_ETCDIR_CONF/21-filemonitoring-$LOGGLY_FILE_TO_MONITOR_ALIAS.conf"
     if [ ! -f ${FILE_SYSLOG_CONFFILE} ] && [ -f ${FILE_TO_MONITOR} ]; then
       constructFileVariables
       checkFileReadPermission
