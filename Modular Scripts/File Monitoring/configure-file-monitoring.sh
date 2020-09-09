@@ -443,12 +443,12 @@ write21ConfFileContents() {
             \$DefaultNetstreamDriverCAFile $CA_FILE_PATH
 
             # Input for FILE1
-            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog-$FILE_TO_MONITOR\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
+            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog-$LOGGLY_FILE_TO_MONITOR_ALIAS\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
 
             # Add a tag for file events
             template(name=\"$CONF_FILE_FORMAT_NAME\" type=\"string\" string=\"<%pri%>%protocol-version% %timestamp:::date-rfc3339% %HOSTNAME% %app-name% %procid% %msgid% [$LOGGLY_AUTH_TOKEN@41058 $TAG] %msg%\n\")
 
-            ruleset(name=\"filelog-$FILE_TO_MONITOR\"){
+            ruleset(name=\"filelog-$LOGGLY_FILE_TO_MONITOR_ALIAS\"){
             action(type=\"omfwd\" protocol=\"tcp\" target=\"logs-01.loggly.com\" port=\"6514\" template=\"$CONF_FILE_FORMAT_NAME\" StreamDriver=\"gtls\" StreamDriverMode=\"1\" StreamDriverAuthMode=\"x509/name\" StreamDriverPermittedPeers=\"*.loggly.com\")
             }
         "
@@ -456,12 +456,12 @@ write21ConfFileContents() {
 
 
             # Input for FILE1
-            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog-$FILE_TO_MONITOR\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
+            input(type=\"imfile\" tag=\"$LOGGLY_FILE_TO_MONITOR_ALIAS\" ruleset=\"filelog-$LOGGLY_FILE_TO_MONITOR_ALIAS\" file=\"$FILE_TO_MONITOR\") #wildcard is allowed at file level only
 
             # Add a tag for file events
             template(name=\"$CONF_FILE_FORMAT_NAME\" type=\"string\" string=\"<%pri%>%protocol-version% %timestamp:::date-rfc3339% %HOSTNAME% %app-name% %procid% %msgid% [$LOGGLY_AUTH_TOKEN@41058 $TAG] %msg%\n\")
 
-            ruleset(name=\"filelog-$FILE_TO_MONITOR\"){
+            ruleset(name=\"filelog-$LOGGLY_FILE_TO_MONITOR_ALIAS\"){
             action(type=\"omfwd\" protocol=\"tcp\" target=\"logs-01.loggly.com\" port=\"514\" template=\"$CONF_FILE_FORMAT_NAME\") stop
             }
         "
