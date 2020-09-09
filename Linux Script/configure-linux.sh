@@ -605,7 +605,7 @@ action(type=\"omfwd\" protocol=\"tcp\" target=\"$LOGS_01_HOST\" port=\"$LOGGLY_S
 installTLSDependencies() {
   if [ $LOGGLY_TLS_SENDING == "true" ]; then
     if [ "$SUPPRESS_PROMPT" == "true" ]; then
-      /bin/bash -c "sudo $PKG_MGR install -y rsyslog-gnutls"
+      /bin/bash -c "sudo $PKG_MGR install -y rsyslog-gnutls --enablerepo=v8-stable --setopt=v8-stable.priority=1"
     else
       /bin/bash -c "sudo $PKG_MGR install rsyslog-gnutls"
     fi
